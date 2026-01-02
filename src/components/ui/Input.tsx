@@ -98,3 +98,47 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
 );
 
 CurrencyInput.displayName = 'CurrencyInput';
+
+// Seletor visual de dia do mês
+interface DayPickerProps {
+  label?: string;
+  value: number;
+  onChange: (day: number) => void;
+  error?: string;
+}
+
+export function DayPicker({ label, value, onChange, error }: DayPickerProps) {
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  return (
+    <div className="w-full">
+      {label && (
+        <label className="block text-sm font-medium text-white mb-3">
+          {label}
+        </label>
+      )}
+      <div className="grid grid-cols-7 gap-2">
+        {days.map((day) => (
+          <button
+            key={day}
+            type="button"
+            onClick={() => onChange(day)}
+            className={`
+              w-full aspect-square rounded-lg text-sm font-medium
+              transition-all duration-200
+              ${value === day
+                ? 'bg-primary text-white scale-105 shadow-lg shadow-primary/30'
+                : 'bg-white/5 text-text-muted hover:bg-white/10 hover:text-white'
+              }
+            `}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+      {error && (
+        <p className="mt-2 text-sm text-danger">{error}</p>
+      )}
+    </div>
+  );
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CurrencyInput, Input } from '../ui';
+import { CurrencyInput, DayPicker } from '../ui';
 import { parseInputToNumber, formatNumberForInput } from '../../utils/formatters';
 
 interface IncomeStepProps {
@@ -56,14 +56,10 @@ export function IncomeStep({ data, onUpdate }: IncomeStepProps) {
       />
 
       {/* Pay day */}
-      <Input
-        type="number"
+      <DayPicker
         label="Dia do pagamento"
-        placeholder="5"
-        min={1}
-        max={31}
-        value={data.payDay || ''}
-        onChange={(e) => onUpdate({ payDay: parseInt(e.target.value) || 5 })}
+        value={data.payDay || 5}
+        onChange={(day) => onUpdate({ payDay: day })}
       />
 
       {/* Advance toggle */}
@@ -93,14 +89,10 @@ export function IncomeStep({ data, onUpdate }: IncomeStepProps) {
       {/* Advance day */}
       {data.hasAdvance && (
         <div className="slide-up">
-          <Input
-            type="number"
+          <DayPicker
             label="Dia do adiantamento"
-            placeholder="20"
-            min={1}
-            max={31}
-            value={data.advanceDay || ''}
-            onChange={(e) => onUpdate({ advanceDay: parseInt(e.target.value) || 20 })}
+            value={data.advanceDay || 20}
+            onChange={(day) => onUpdate({ advanceDay: day })}
           />
         </div>
       )}
