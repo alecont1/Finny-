@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CurrencyInput, ProgressBar } from '../ui';
 import { formatCurrency, parseInputToNumber, formatNumberForInput } from '../../utils/formatters';
 
@@ -26,9 +26,11 @@ export function GoalStep({ available, savingsGoal, onUpdate }: GoalStepProps) {
     onUpdate(parseInputToNumber(value));
   };
 
-  useEffect(() => {
-    setInputValue(formatNumberForInput(savingsGoal));
-  }, [savingsGoal]);
+  const handleSuggestionClick = (value: number) => {
+    const rounded = Math.round(value);
+    setInputValue(formatNumberForInput(rounded));
+    onUpdate(rounded);
+  };
 
   return (
     <div className="space-y-6">
@@ -62,7 +64,7 @@ export function GoalStep({ available, savingsGoal, onUpdate }: GoalStepProps) {
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.label}
-              onClick={() => onUpdate(Math.round(suggestion.value))}
+              onClick={() => handleSuggestionClick(suggestion.value)}
               className={`
                 flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all
                 ${Math.abs(savingsGoal - suggestion.value) < 1

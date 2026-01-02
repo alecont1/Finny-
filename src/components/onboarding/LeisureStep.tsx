@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CurrencyInput, ProgressBar } from '../ui';
 import { formatCurrency, parseInputToNumber, formatNumberForInput } from '../../utils/formatters';
 
@@ -20,9 +20,11 @@ export function LeisureStep({ availableAfterSavings, leisureBudget, onUpdate }: 
     onUpdate(parseInputToNumber(value));
   };
 
-  useEffect(() => {
-    setInputValue(formatNumberForInput(leisureBudget));
-  }, [leisureBudget]);
+  const handleSuggestionClick = (value: number) => {
+    const rounded = Math.round(value);
+    setInputValue(formatNumberForInput(rounded));
+    onUpdate(rounded);
+  };
 
   // Sugestões
   const suggestions = [
@@ -78,7 +80,7 @@ export function LeisureStep({ availableAfterSavings, leisureBudget, onUpdate }: 
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.label}
-              onClick={() => onUpdate(Math.round(suggestion.value))}
+              onClick={() => handleSuggestionClick(suggestion.value)}
               className={`
                 flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all
                 ${Math.abs(leisureBudget - suggestion.value) < 1
