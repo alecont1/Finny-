@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finny-v1';
+const CACHE_NAME = 'finny-v2';
 const urlsToCache = [
   '/',
   '/index.html',
