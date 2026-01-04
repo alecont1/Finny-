@@ -19,5 +19,10 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Desabilitando regras muito estritas do React 19 que causam falsos positivos
+      // em patterns validos como sincronizar estado com props
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])
