@@ -66,8 +66,8 @@ function AppContent() {
     );
   }
 
-  // Redirecionar para onboarding se não completou
-  if (!hasCompletedOnboarding && location.pathname !== '/onboarding') {
+  // Redirecionar para onboarding se não completou (exceto se estiver no checkout)
+  if (!hasCompletedOnboarding && location.pathname !== '/onboarding' && location.pathname !== '/checkout') {
     return <Navigate to="/onboarding" replace />;
   }
 
