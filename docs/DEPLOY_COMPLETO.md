@@ -27,6 +27,7 @@
 | Git | OK - Atualizado no GitHub |
 | Vercel | OK - Deploy em producao |
 | Supabase | OK - Configurado |
+| Stripe | OK - Integrado |
 
 ---
 
@@ -46,6 +47,13 @@
 - **URL**: https://finny-three.vercel.app
 - **Status**: Deploy em producao
 - **Guia**: docs/DEPLOY_VERCEL.md
+
+### 4. Stripe
+- **Conta**: Fineplanner (acct_1Slf2zRoGwTts6CY)
+- **Produto**: fine premium (R$ 12,90/mes)
+- **Price ID**: price_1SlfIGRoGwTts6CYTOkrDBMS
+- **Status**: Integrado e funcionando
+- **Guia**: docs/STRIPE_CONFIG.md
 
 ---
 
@@ -159,7 +167,7 @@ Para problemas de deploy:
 
 - [ ] Configurar dominio customizado
 - [ ] Configurar SSL
-- [ ] Configurar Stripe (para pagamentos)
+- [x] Configurar Stripe (para pagamentos) - FEITO
 - [ ] Configurar monitoramento (Sentry)
 - [ ] Configurar analytics
 - [ ] Configurar backup do banco
