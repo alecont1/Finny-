@@ -1,8 +1,8 @@
 # Relatorio de Debug - Finny
 
-## Data: 2026-01-03
+## Data: 2026-01-04
 
-## Status Geral: OK
+## Status Geral: OK - TESTADO COM SUPABASE LOCAL
 
 O projeto Finny esta funcionando corretamente. Todos os erros de ESLint foram corrigidos e o build compila sem problemas.
 
@@ -30,8 +30,8 @@ Nenhum erro pendente. Todos foram resolvidos.
 | Fluxo | Status | Observacoes |
 |-------|--------|-------------|
 | Landing Page | OK | Carrega corretamente |
-| Signup | PARCIAL | Requer Supabase configurado |
-| Login | PARCIAL | Requer Supabase configurado |
+| Signup | OK | Testado com Supabase Local |
+| Login | OK | Testado com Supabase Local |
 | Onboarding | OK | 6 etapas funcionais |
 | Dashboard | OK | Todos componentes presentes |
 | Adicionar Gasto | OK | Modal funcional com validacao |
@@ -39,6 +39,28 @@ Nenhum erro pendente. Todos foram resolvidos.
 | Configuracoes | OK | Perfil e despesas |
 | Visao Anual | OK | Componente presente |
 | Checkout | PARCIAL | Requer Stripe configurado |
+
+---
+
+## Testes com Supabase Local
+
+| Categoria | Operacao | Status |
+|-----------|----------|--------|
+| Auth | Signup | OK |
+| Auth | Login | OK |
+| Transactions | CREATE | OK |
+| Transactions | READ | OK |
+| Transactions | UPDATE | OK |
+| Transactions | DELETE | OK |
+| Profiles | READ | OK |
+| Profiles | UPDATE | OK |
+| Fixed Expenses | CREATE | OK |
+| RLS | Sem Auth | BLOQUEADO (esperado) |
+| RLS | Com Auth | OK |
+
+**Total**: 11/11 testes com Supabase passando
+
+Ver detalhes em: `docs/TESTES_SUPABASE.md`
 
 ---
 
@@ -132,14 +154,24 @@ supabase/
   functions/      # Edge Functions
 
 docs/
-  ANALISE.md      # Analise do projeto
-  ERROS.md        # Erros encontrados e corrigidos
-  TESTES.md       # Testes de fluxo
-  RESUMO_FINAL.md # Este arquivo
+  ANALISE.md         # Analise do projeto
+  ERROS.md           # Erros encontrados e corrigidos
+  TESTES.md          # Testes de fluxo
+  TESTES_SUPABASE.md # Testes com Supabase Local
+  RESUMO_FINAL.md    # Este arquivo
 ```
 
 ---
 
 ## Conclusao
 
-O projeto Finny esta em bom estado. Os erros de ESLint foram corrigidos e o aplicativo compila e roda sem problemas. Para uso em producao, e necessario configurar as credenciais do Supabase e Stripe.
+O projeto Finny esta em bom estado. Os erros de ESLint foram corrigidos e o aplicativo compila e roda sem problemas.
+
+**Testes com Supabase Local (2026-01-04)**:
+- Autenticacao (signup/login): OK
+- CRUD Transactions: OK
+- CRUD Profiles: OK
+- CRUD Fixed Expenses: OK
+- Row Level Security (RLS): OK
+
+Para uso em producao, e necessario configurar as credenciais do Supabase Cloud e Stripe.
