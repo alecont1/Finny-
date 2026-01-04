@@ -22,10 +22,14 @@ CREATE TABLE IF NOT EXISTS profiles (
   leisure_budget DECIMAL(10,2) DEFAULT 0,
 
   -- Plano e assinatura
-  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'premium')),
+  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'premium', 'trial')),
   plan_expires_at TIMESTAMPTZ,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
+
+  -- Trial
+  trial_ends_at TIMESTAMPTZ,
+  subscription_status TEXT DEFAULT 'none' CHECK (subscription_status IN ('none', 'trialing', 'active', 'canceled', 'past_due')),
 
   -- Status
   has_completed_onboarding BOOLEAN DEFAULT FALSE

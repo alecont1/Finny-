@@ -31,7 +31,7 @@ export function Landing() {
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <div className="inline-block bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-            Novo: Sincronize entre dispositivos
+            7 dias grátis para testar
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
@@ -49,13 +49,13 @@ export function Landing() {
               to="/signup"
               className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white text-lg font-semibold px-8 py-4 rounded-xl transition flex items-center justify-center gap-2"
             >
-              Começar Grátis
+              Testar 7 Dias Grátis
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
             <p className="text-text-muted text-sm">
-              Sem cartão de crédito • Setup em 2 minutos
+              Cancele quando quiser • Setup em 2 minutos
             </p>
           </div>
         </div>
@@ -201,114 +201,86 @@ export function Landing() {
 
       {/* Pricing */}
       <section className="py-20 px-4" id="pricing">
-        <div className="container mx-auto max-w-5xl">
-          <div className="text-center mb-16">
+        <div className="container mx-auto max-w-lg">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Planos simples e transparentes
+              Preço simples e transparente
             </h2>
             <p className="text-text-muted text-lg">
-              Comece grátis, faça upgrade quando precisar
+              Teste grátis por 7 dias, cancele quando quiser
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Free */}
-            <div className="bg-surface rounded-2xl p-8 border border-white/10">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-white mb-2">Grátis</h3>
-                <p className="text-text-muted">Perfeito para começar</p>
-              </div>
-
-              <div className="mb-8">
-                <span className="text-4xl font-bold text-white">R$ 0</span>
-                <span className="text-text-muted">/mês</span>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  30 transações por mês
-                </li>
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  5 despesas fixas
-                </li>
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Histórico de 3 meses
-                </li>
-                <li className="flex items-center gap-3 text-text-muted">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <span className="line-through">Exportar CSV/PDF</span>
-                </li>
-              </ul>
-
-              <Link
-                to="/signup"
-                className="block w-full text-center border border-white/20 text-white py-3 rounded-xl hover:bg-white/5 transition font-semibold"
-              >
-                Começar Grátis
-              </Link>
+          {/* Single Plan */}
+          <div className="bg-gradient-to-br from-primary/20 to-surface rounded-2xl p-8 border border-primary/30 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-sm font-bold px-4 py-1 rounded-full">
+              7 DIAS GRÁTIS
             </div>
 
-            {/* Premium */}
-            <div className="bg-gradient-to-br from-primary/20 to-surface rounded-2xl p-8 border border-primary/30 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-sm font-bold px-4 py-1 rounded-full">
-                MAIS POPULAR
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-white mb-2">Premium</h3>
-                <p className="text-text-muted">Para quem quer o máximo</p>
-              </div>
-
-              <div className="mb-8">
-                <span className="text-4xl font-bold text-white">R$ 12,90</span>
-                <span className="text-text-muted">/mês</span>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Transações ilimitadas
-                </li>
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Despesas fixas ilimitadas
-                </li>
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Histórico completo
-                </li>
-                <li className="flex items-center gap-3 text-white">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Exportar CSV e PDF
-                </li>
-              </ul>
-
-              <Link
-                to="/signup?plan=premium"
-                className="block w-full text-center bg-primary hover:bg-primary/90 text-white py-3 rounded-xl transition font-semibold"
-              >
-                Começar Premium
-              </Link>
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-bold text-white mb-2">Finny Premium</h3>
+              <p className="text-text-muted">Acesso completo a todas as funcionalidades</p>
             </div>
+
+            <div className="text-center mb-6">
+              <div className="text-5xl font-bold text-white mb-2">R$ 12,90</div>
+              <span className="text-text-muted">/mês após o trial</span>
+            </div>
+
+            <div className="bg-white/5 rounded-xl p-4 mb-6 text-center">
+              <p className="text-white font-medium">Hoje você paga: <span className="text-primary text-xl font-bold">R$ 0</span></p>
+              <p className="text-text-muted text-sm">Cobrança apenas após 7 dias</p>
+            </div>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center gap-3 text-white">
+                <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Transações ilimitadas
+              </li>
+              <li className="flex items-center gap-3 text-white">
+                <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Despesas fixas ilimitadas
+              </li>
+              <li className="flex items-center gap-3 text-white">
+                <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Histórico completo de gastos
+              </li>
+              <li className="flex items-center gap-3 text-white">
+                <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Exportar para CSV e PDF
+              </li>
+              <li className="flex items-center gap-3 text-white">
+                <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Sincronização na nuvem
+              </li>
+              <li className="flex items-center gap-3 text-white">
+                <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Cancele quando quiser
+              </li>
+            </ul>
+
+            <Link
+              to="/signup"
+              className="block w-full text-center bg-primary hover:bg-primary/90 text-white py-4 rounded-xl transition font-semibold text-lg"
+            >
+              Começar 7 Dias Grátis
+            </Link>
+
+            <p className="text-center text-text-muted text-xs mt-4">
+              🔒 Pagamento seguro via Stripe
+            </p>
           </div>
         </div>
       </section>
@@ -321,13 +293,13 @@ export function Landing() {
               Pronto para organizar seu dinheiro?
             </h2>
             <p className="text-text-muted text-lg mb-8">
-              Comece grátis hoje e veja a diferença no final do mês.
+              Comece seu trial de 7 dias e veja a diferença no final do mês.
             </p>
             <Link
               to="/signup"
               className="inline-block bg-primary hover:bg-primary/90 text-white text-lg font-semibold px-8 py-4 rounded-xl transition"
             >
-              Criar Conta Grátis
+              Começar Trial Grátis
             </Link>
           </div>
         </div>

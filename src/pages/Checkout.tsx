@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/ui'
 
 export function Checkout() {
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const isNewUser = searchParams.get('new') === 'true'
 
   const handleCheckout = async () => {
     if (!user) return
@@ -29,7 +32,8 @@ export function Checkout() {
           body: JSON.stringify({
             userId: user.id,
             email: user.email,
-            returnUrl: `${window.location.origin}/dashboard`
+            returnUrl: `${window.location.origin}/onboarding`,
+            trialDays: 7
           })
         }
       )
@@ -56,83 +60,99 @@ export function Checkout() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back button */}
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center gap-2 text-text-muted hover:text-white mb-8 transition"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Voltar
-        </Link>
+        {/* Back button - only show if not new user */}
+        {!isNewUser && (
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 text-text-muted hover:text-white mb-8 transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Voltar
+          </Link>
+        )}
 
         <div className="bg-surface rounded-2xl p-8 border border-white/10">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="text-5xl mb-4">🚀</div>
+            <div className="text-5xl mb-4">🎉</div>
             <h1 className="text-2xl font-bold text-white mb-2">
-              Upgrade para Premium
+              {isNewUser ? 'Comece sua jornada!' : 'Upgrade para Premium'}
             </h1>
             <p className="text-text-muted">
-              Desbloqueie todo o potencial do Finny
+              {isNewUser
+                ? '7 dias grátis para experimentar tudo'
+                : 'Desbloqueie todo o potencial do Finny'
+              }
             </p>
           </div>
 
-          {/* Price */}
-          <div className="bg-primary/10 border border-primary/20 rounded-xl p-6 mb-8 text-center">
-            <div className="text-4xl font-bold text-white mb-1">
-              R$ 12,90
-              <span className="text-lg text-text-muted font-normal">/mês</span>
+          {/* Trial Badge */}
+          <div className="bg-gradient-to-r from-primary/20 to-emerald-500/20 border border-primary/30 rounded-xl p-4 mb-6 text-center">
+            <div className="text-2xl font-bold text-white mb-1">
+              7 DIAS GRÁTIS
             </div>
-            <p className="text-text-muted text-sm">Cancele quando quiser</p>
+            <p className="text-primary text-sm">Depois apenas R$ 12,90/mês</p>
+          </div>
+
+          {/* Price breakdown */}
+          <div className="bg-white/5 rounded-xl p-4 mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-text-muted">Hoje você paga:</span>
+              <span className="text-2xl font-bold text-white">R$ 0,00</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-text-muted">Após 7 dias:</span>
+              <span className="text-text-muted">R$ 12,90/mês</span>
+            </div>
           </div>
 
           {/* Benefits */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-white">Transações ilimitadas</span>
+              <span className="text-white text-sm">Transações ilimitadas</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-white">Despesas fixas ilimitadas</span>
+              <span className="text-white text-sm">Despesas fixas ilimitadas</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-white">Histórico completo</span>
+              <span className="text-white text-sm">Histórico completo</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-white">Exportar para CSV e PDF</span>
+              <span className="text-white text-sm">Exportar para CSV e PDF</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-white">Suporte prioritário</span>
+              <span className="text-white text-sm">Cancele quando quiser</span>
             </div>
           </div>
 
@@ -155,46 +175,31 @@ export function Checkout() {
                 Processando...
               </span>
             ) : (
-              'Assinar Premium'
+              <>
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Começar Trial Grátis
+              </>
             )}
           </Button>
 
           {/* Security note */}
-          <p className="text-center text-text-muted text-xs mt-6">
-            🔒 Pagamento seguro via Stripe
-          </p>
+          <div className="mt-4 p-3 bg-white/5 rounded-lg">
+            <p className="text-text-muted text-xs text-center">
+              🔒 Pagamento seguro via Stripe. Você pode cancelar a qualquer momento antes do trial acabar e não será cobrado.
+            </p>
+          </div>
         </div>
 
-        {/* FAQ */}
-        <div className="mt-8 space-y-4">
-          <h3 className="text-white font-semibold">Dúvidas frequentes</h3>
-
-          <details className="bg-surface/50 rounded-lg">
-            <summary className="p-4 text-white cursor-pointer hover:bg-white/5 transition rounded-lg">
-              Posso cancelar a qualquer momento?
-            </summary>
-            <p className="px-4 pb-4 text-text-muted text-sm">
-              Sim! Você pode cancelar sua assinatura a qualquer momento. O acesso premium continua até o fim do período pago.
-            </p>
-          </details>
-
-          <details className="bg-surface/50 rounded-lg">
-            <summary className="p-4 text-white cursor-pointer hover:bg-white/5 transition rounded-lg">
-              Quais formas de pagamento são aceitas?
-            </summary>
-            <p className="px-4 pb-4 text-text-muted text-sm">
-              Aceitamos cartões de crédito (Visa, Mastercard, Amex) e PIX através do Stripe.
-            </p>
-          </details>
-
-          <details className="bg-surface/50 rounded-lg">
-            <summary className="p-4 text-white cursor-pointer hover:bg-white/5 transition rounded-lg">
-              Meus dados são perdidos se eu cancelar?
-            </summary>
-            <p className="px-4 pb-4 text-text-muted text-sm">
-              Não! Seus dados são mantidos mesmo no plano gratuito. Apenas os recursos premium ficam indisponíveis.
-            </p>
-          </details>
+        {/* Info */}
+        <div className="mt-6 text-center text-text-muted text-sm">
+          <p>Ao continuar, você concorda com nossos</p>
+          <p>
+            <a href="#" className="text-primary hover:underline">Termos de Uso</a>
+            {' '}e{' '}
+            <a href="#" className="text-primary hover:underline">Política de Privacidade</a>
+          </p>
         </div>
       </div>
     </div>

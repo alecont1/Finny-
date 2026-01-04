@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
+import { useSubscription } from './hooks/useSubscription';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Pages
@@ -19,8 +20,25 @@ import { Checkout } from './pages/Checkout';
 import { AddExpenseModal } from './components/expenses/AddExpenseModal';
 import { BottomNav } from './components/ui';
 
+function TrialBanner({ daysRemaining }: { daysRemaining: number | null }) {
+  if (daysRemaining === null || daysRemaining > 3) return null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-center py-2 text-sm font-medium">
+      {daysRemaining <= 0 ? (
+        <span>Seu trial expirou! <a href="/checkout" className="underline font-bold">Assine agora</a></span>
+      ) : daysRemaining === 1 ? (
+        <span>Último dia do trial! <a href="/checkout" className="underline font-bold">Assine agora</a></span>
+      ) : (
+        <span>{daysRemaining} dias restantes no trial. <a href="/checkout" className="underline font-bold">Assinar</a></span>
+      )}
+    </div>
+  );
+}
+
 function AppContent() {
   const { profile, loading: profileLoading } = useProfile();
+  const { subscription } = useSubscription();
   const [showAddExpense, setShowAddExpense] = useState(false);
   const location = useLocation();
 
@@ -30,6 +48,11 @@ function AppContent() {
   // Páginas sem bottom nav
   const pagesWithoutNav = ['/onboarding', '/checkout'];
   const showBottomNav = hasCompletedOnboarding && !pagesWithoutNav.includes(location.pathname);
+
+  // Show trial banner
+  const showTrialBanner = subscription?.subscriptionStatus === 'trialing' &&
+                          subscription.daysRemaining !== null &&
+                          subscription.daysRemaining <= 3;
 
   // Loading do profile
   if (profileLoading) {
@@ -49,7 +72,9 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${showTrialBanner ? 'pt-10' : ''}`}>
+      {showTrialBanner && <TrialBanner daysRemaining={subscription?.daysRemaining ?? null} />}
+
       <Routes>
         <Route
           path="/"
@@ -89,10 +114,11 @@ function AppContent() {
 
 function App() {
   const { user, loading } = useAuth();
+  const { subscription, loading: subscriptionLoading, needsSubscription } = useSubscription();
   const location = useLocation();
 
   // Loading do auth
-  if (loading) {
+  if (loading || (user && subscriptionLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -123,12 +149,23 @@ function App() {
     return <Navigate to="/login" replace />;
   }
 
+  // Se autenticado mas sem assinatura, redirecionar para checkout
+  // Exceto se já estiver na página de checkout
+  if (user && needsSubscription() && location.pathname !== '/checkout') {
+    return <Navigate to="/checkout?new=true" replace />;
+  }
+
   // Se autenticado e tentando acessar login/signup, redirecionar
   if (user && (location.pathname === '/login' || location.pathname === '/signup')) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Usuário autenticado - mostrar app
+  // Se trial expirou e não está ativo, redirecionar para checkout
+  if (user && subscription && !subscription.isActive && subscription.subscriptionStatus !== 'none' && location.pathname !== '/checkout') {
+    return <Navigate to="/checkout" replace />;
+  }
+
+  // Usuário autenticado com assinatura ativa - mostrar app
   return (
     <ProtectedRoute>
       <AppContent />
