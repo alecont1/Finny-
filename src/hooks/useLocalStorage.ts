@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useSyncExternalStore } from 'react';
 
 /**
  * Hook para persistir um valor no localStorage
@@ -18,7 +18,7 @@ export function useLocalStorage<T>(
     }
   });
 
-  // Função para atualizar o valor
+  // Funcao para atualizar o valor
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
       try {
@@ -35,15 +35,21 @@ export function useLocalStorage<T>(
   return [storedValue, setValue];
 }
 
+// Store simples para detectar client-side
+const clientStore = {
+  subscribe: () => () => {},
+  getSnapshot: () => true,
+  getServerSnapshot: () => false,
+};
+
 /**
- * Hook para detectar se o código está rodando no lado do cliente
+ * Hook para detectar se o codigo esta rodando no lado do cliente
+ * Usa useSyncExternalStore para evitar o pattern de setState em useEffect
  */
 export function useIsClient(): boolean {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  return isClient;
+  return useSyncExternalStore(
+    clientStore.subscribe,
+    clientStore.getSnapshot,
+    clientStore.getServerSnapshot
+  );
 }
