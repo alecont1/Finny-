@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
 import { useSubscription } from './hooks/useSubscription';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { supabase } from './lib/supabase';
 
 // Pages
 import { Landing } from './pages/Landing';
@@ -114,8 +115,41 @@ function AppContent() {
 
 function App() {
   const { user, loading } = useAuth();
-  const { subscription, loading: subscriptionLoading, needsSubscription } = useSubscription();
+  const { subscription, loading: subscriptionLoading, needsSubscription, refetch } = useSubscription();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const [checkoutCompleted, setCheckoutCompleted] = useState(false);
+
+  // Verificar se voltou do checkout com sucesso
+  const sessionId = searchParams.get('session_id');
+
+  useEffect(() => {
+    if (sessionId && user && !checkoutCompleted) {
+      // Marcar como checkout completado para evitar loops
+      setCheckoutCompleted(true);
+
+      // Atualizar status da assinatura no banco
+      const updateSubscription = async () => {
+        try {
+          await supabase
+            .from('profiles')
+            .update({
+              subscription_status: 'trialing',
+              plan: 'premium',
+              trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            })
+            .eq('id', user.id);
+
+          // Refetch subscription data
+          refetch();
+        } catch (error) {
+          console.error('Error updating subscription:', error);
+        }
+      };
+
+      updateSubscription();
+    }
+  }, [sessionId, user, checkoutCompleted, refetch]);
 
   // Loading do auth
   if (loading || (user && subscriptionLoading)) {
@@ -150,8 +184,8 @@ function App() {
   }
 
   // Se autenticado mas sem assinatura, redirecionar para checkout
-  // Exceto se já estiver na página de checkout
-  if (user && needsSubscription() && location.pathname !== '/checkout') {
+  // Exceto se já estiver na página de checkout ou se voltou do checkout com session_id
+  if (user && needsSubscription() && location.pathname !== '/checkout' && !sessionId && !checkoutCompleted) {
     return <Navigate to="/checkout?new=true" replace />;
   }
 
