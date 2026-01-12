@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Button, ProgressBar } from '../components/ui';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { useProfile } from '../hooks/useProfile';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import { WelcomeStep } from '../components/onboarding/WelcomeStep';
 import { IncomeStep } from '../components/onboarding/IncomeStep';
 import { ExpensesStep } from '../components/onboarding/ExpensesStep';
@@ -11,6 +13,7 @@ import { CompleteStep } from '../components/onboarding/CompleteStep';
 
 export function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   const { completeOnboarding: saveToDatabase } = useProfile();
   const {
     step,
@@ -29,7 +32,7 @@ export function Onboarding() {
   } = useOnboarding();
 
   const handleComplete = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !user) return;
     setIsSubmitting(true);
 
     try {
@@ -55,8 +58,29 @@ export function Onboarding() {
         return;
       }
 
-      // Use window.location to force full page reload
-      // This ensures all hooks fetch fresh data from the database
+      // Polling: wait for database confirmation before redirecting
+      // This prevents race condition where redirect happens before data is synced
+      let retries = 5;
+      while (retries > 0) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('has_completed_onboarding')
+          .eq('id', user.id)
+          .single();
+
+        if (profileData?.has_completed_onboarding === true) {
+          // Confirmed! Safe to redirect
+          window.location.href = '/dashboard';
+          return;
+        }
+
+        // Wait 500ms before retrying
+        await new Promise(resolve => setTimeout(resolve, 500));
+        retries--;
+      }
+
+      // If we get here, polling failed - redirect anyway and hope for the best
+      console.warn('Polling timeout, redirecting anyway');
       window.location.href = '/dashboard';
     } catch (err) {
       console.error('Error completing onboarding:', err);
