@@ -38,7 +38,7 @@ function TrialBanner({ daysRemaining }: { daysRemaining: number | null }) {
 }
 
 function AppContent() {
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading, error: profileError } = useProfile();
   const { subscription } = useSubscription();
   const [showAddExpense, setShowAddExpense] = useState(false);
   const location = useLocation();
@@ -62,6 +62,25 @@ function AppContent() {
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
           <p className="text-text-muted">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if profile fetch failed (don't redirect to onboarding on error)
+  if (profileError && !profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center p-4">
+          <div className="text-5xl mb-2">⚠️</div>
+          <p className="text-danger">Erro ao carregar perfil</p>
+          <p className="text-text-muted text-sm">{profileError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition"
+          >
+            Tentar novamente
+          </button>
         </div>
       </div>
     );
@@ -131,7 +150,7 @@ function App() {
       // Atualizar status da assinatura no banco
       const updateSubscription = async () => {
         try {
-          await supabase
+          const { error } = await supabase
             .from('profiles')
             .update({
               subscription_status: 'trialing',
@@ -140,8 +159,13 @@ function App() {
             })
             .eq('id', user.id);
 
-          // Refetch subscription data
-          refetch();
+          if (error) {
+            console.error('Error updating subscription:', error);
+            return;
+          }
+
+          // Refetch subscription data after successful update
+          await refetch();
         } catch (error) {
           console.error('Error updating subscription:', error);
         }
@@ -184,8 +208,8 @@ function App() {
   }
 
   // Se autenticado mas sem assinatura, redirecionar para checkout
-  // Exceto se já estiver na página de checkout ou se voltou do checkout com session_id
-  if (user && needsSubscription() && location.pathname !== '/checkout' && !sessionId && !checkoutCompleted) {
+  // Exceto se já estiver na página de checkout/onboarding ou se voltou do checkout com session_id
+  if (user && needsSubscription() && location.pathname !== '/checkout' && location.pathname !== '/onboarding' && !sessionId && !checkoutCompleted) {
     return <Navigate to="/checkout?new=true" replace />;
   }
 
