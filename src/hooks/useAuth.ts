@@ -2,6 +2,21 @@ import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
+// Use configured APP_URL for OAuth redirects (required for Google OAuth to work)
+// Falls back to window.location.origin for local development
+const getAppUrl = () => {
+  const configuredUrl = import.meta.env.VITE_APP_URL
+  if (configuredUrl) {
+    // Remove trailing slash if present
+    return configuredUrl.replace(/\/$/, '')
+  }
+  // Fallback for local development
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+  return ''
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -31,11 +46,14 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signInWithGoogle = () =>
-    supabase.auth.signInWithOAuth({
+  const signInWithGoogle = () => {
+    const appUrl = getAppUrl()
+    console.log('Google OAuth redirect URL:', `${appUrl}/dashboard`)
+    return supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` }
+      options: { redirectTo: `${appUrl}/dashboard` }
     })
+  }
 
   const signInWithEmail = (email: string, password: string) =>
     supabase.auth.signInWithPassword({ email, password })
@@ -49,10 +67,12 @@ export function useAuth() {
 
   const signOut = () => supabase.auth.signOut()
 
-  const resetPassword = (email: string) =>
-    supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
+  const resetPassword = (email: string) => {
+    const appUrl = getAppUrl()
+    return supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${appUrl}/reset-password`
     })
+  }
 
   return {
     user,

@@ -27,11 +27,36 @@
      - `https://seu-dominio.vercel.app/dashboard`
      - `http://localhost:5173/dashboard` (para desenvolvimento)
 
+### ⚠️ Desabilitar Confirmação de Email (Recomendado para testes)
+Por padrão, o Supabase requer confirmação de email. Se você não configurou SMTP, os emails **NÃO serão enviados**.
+
+**Para desabilitar a confirmação de email:**
+1. Vá em **Authentication > Providers > Email**
+2. Desabilite "Confirm email" (toggle off)
+3. Salve as alterações
+
+**Ou para configurar SMTP (produção):**
+1. Vá em **Project Settings > Authentication > SMTP Settings**
+2. Habilite "Custom SMTP"
+3. Configure com seu provedor (SendGrid, Mailgun, etc.)
+
 ### Google OAuth (Opcional)
 1. Vá em **Authentication > Providers > Google**
 2. Habilite o Google
-3. Crie credenciais OAuth no [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-4. Cole o Client ID e Client Secret
+3. Crie credenciais OAuth no [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+   - Clique em "Create Credentials" > "OAuth 2.0 Client IDs"
+   - Tipo: Web application
+   - **Authorized JavaScript origins**:
+     - `https://seu-dominio.vercel.app` (produção)
+     - `http://localhost:5173` (desenvolvimento)
+   - **Authorized redirect URIs**:
+     - `https://[SEU-PROJECT-ID].supabase.co/auth/v1/callback` ⚠️ OBRIGATÓRIO
+4. Cole o Client ID e Client Secret no Supabase
+5. **IMPORTANTE**: Configure também no Supabase:
+   - Vá em **Authentication > URL Configuration**
+   - Adicione às Redirect URLs:
+     - `https://seu-dominio.vercel.app/dashboard`
+     - `http://localhost:5173/dashboard` (desenvolvimento)
 
 ## 4. Obter Credenciais
 
@@ -126,11 +151,24 @@ supabase functions deploy create-checkout
 
 ## 7. Deploy
 
-### Vercel (Recomendado)
+### Railway
+
+1. Push para o GitHub
+2. Importe o repositório no Railway
+3. Configure as variáveis de ambiente:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_APP_URL` = `https://seu-projeto.up.railway.app` ⚠️ **OBRIGATÓRIO para OAuth**
+4. Deploy automático!
+
+### Vercel
 
 1. Push para o GitHub
 2. Importe o repositório no Vercel
-3. Configure as variáveis de ambiente
+3. Configure as variáveis de ambiente:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_APP_URL` = `https://seu-projeto.vercel.app` ⚠️ **OBRIGATÓRIO para OAuth**
 4. Deploy automático!
 
 ### Comandos Úteis
@@ -152,6 +190,17 @@ npm run preview
 - Verifique se as variáveis de ambiente estão corretas
 - O Supabase URL deve incluir `https://`
 
+### Email de confirmação não chega
+- O Supabase não envia emails se SMTP não estiver configurado
+- **Solução rápida**: Desabilite "Confirm email" em Authentication > Providers > Email
+- **Solução produção**: Configure SMTP em Project Settings > Authentication > SMTP Settings
+
+### "Email ou senha incorretos" após cadastro
+- Provavelmente o email não foi confirmado
+- Vá no Supabase Dashboard > Authentication > Users
+- Encontre o usuário e confirme manualmente clicando em "Confirm email"
+- Ou desabilite a confirmação de email (ver seção acima)
+
 ### "RLS policy violation"
 - Execute o schema SQL novamente
 - Verifique se as policies foram criadas corretamente
@@ -159,6 +208,17 @@ npm run preview
 ### Usuários não conseguem se cadastrar
 - Verifique as configurações de URL no Supabase Auth
 - Adicione os domínios às Redirect URLs
+
+### Google Login não funciona
+- **Erro "redirect_uri_mismatch"**: A URL de callback não está registrada no Google Cloud Console
+  - Adicione `https://[SEU-PROJECT-ID].supabase.co/auth/v1/callback` às Authorized redirect URIs
+- **OAuth popup fecha sem login**: Verifique se o Client ID e Secret estão corretos no Supabase
+- **VITE_APP_URL não configurada**:
+  - Esta variável é OBRIGATÓRIA para o OAuth funcionar em produção
+  - Configure no Railway/Vercel: `VITE_APP_URL=https://sua-url-de-producao.app`
+- **Erro no console "Auth error"**:
+  - Verifique se o Google Provider está habilitado no Supabase
+  - Confirme que as Redirect URLs incluem sua URL de produção + `/dashboard`
 
 ## Próximos Passos
 
