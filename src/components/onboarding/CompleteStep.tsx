@@ -10,9 +10,10 @@ interface CompleteStepProps {
   };
   totalFixedExpenses: number;
   onComplete: () => void;
+  isLoading?: boolean;
 }
 
-export function CompleteStep({ data, totalFixedExpenses, onComplete }: CompleteStepProps) {
+export function CompleteStep({ data, totalFixedExpenses, onComplete, isLoading = false }: CompleteStepProps) {
   const totalIncome = data.salary + data.otherIncome;
   const available = totalIncome - totalFixedExpenses;
   const afterSavings = available - data.savingsGoal;
@@ -108,8 +109,15 @@ export function CompleteStep({ data, totalFixedExpenses, onComplete }: CompleteS
       </div>
 
       {/* CTA */}
-      <Button size="lg" onClick={onComplete} fullWidth className="mt-8">
-        Começar a usar o Finny
+      <Button size="lg" onClick={onComplete} fullWidth className="mt-8" disabled={isLoading}>
+        {isLoading ? (
+          <span className="flex items-center justify-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white" />
+            Salvando...
+          </span>
+        ) : (
+          'Começar a usar o Finny'
+        )}
       </Button>
     </div>
   );

@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, ProgressBar } from '../components/ui';
 import { useOnboarding } from '../hooks/useOnboarding';
+import { useProfile } from '../hooks/useProfile';
 import { WelcomeStep } from '../components/onboarding/WelcomeStep';
 import { IncomeStep } from '../components/onboarding/IncomeStep';
 import { ExpensesStep } from '../components/onboarding/ExpensesStep';
@@ -10,6 +12,8 @@ import { CompleteStep } from '../components/onboarding/CompleteStep';
 
 export function Onboarding() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { completeOnboarding: saveToDatabase } = useProfile();
   const {
     step,
     totalSteps,
@@ -24,12 +28,40 @@ export function Onboarding() {
     getTotalIncome,
     getAvailableAfterFixed,
     getAvailableAfterSavings,
-    completeOnboarding,
   } = useOnboarding();
 
-  const handleComplete = () => {
-    completeOnboarding();
-    navigate('/dashboard');
+  const handleComplete = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      // Save to Supabase database
+      const { error } = await saveToDatabase({
+        salary: data.salary,
+        otherIncome: data.otherIncome,
+        payDay: data.payDay,
+        hasAdvance: data.hasAdvance,
+        advanceDay: data.advanceDay,
+        savingsGoal: data.savingsGoal,
+        leisureBudget: data.leisureBudget,
+        fixedExpenses: data.fixedExpenses.map(exp => ({
+          name: exp.name,
+          amount: exp.amount,
+          category: exp.category
+        }))
+      });
+
+      if (error) {
+        console.error('Error completing onboarding:', error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Error completing onboarding:', err);
+      setIsSubmitting(false);
+    }
   };
 
   const canProceed = () => {
@@ -90,6 +122,7 @@ export function Onboarding() {
             data={data}
             totalFixedExpenses={getTotalFixedExpenses()}
             onComplete={handleComplete}
+            isLoading={isSubmitting}
           />
         );
       default:
