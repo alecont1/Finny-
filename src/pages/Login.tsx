@@ -19,9 +19,14 @@ export function Login() {
     const { error } = await signInWithEmail(email, password)
 
     if (error) {
-      setError(error.message === 'Invalid login credentials'
-        ? 'Email ou senha incorretos'
-        : error.message)
+      // Handle different error messages
+      let errorMessage = error.message
+      if (error.message === 'Invalid login credentials') {
+        errorMessage = 'Email ou senha incorretos'
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Email não confirmado. Verifique sua caixa de entrada ou spam.'
+      }
+      setError(errorMessage)
       setIsLoading(false)
     } else {
       navigate('/dashboard')
