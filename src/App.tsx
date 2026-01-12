@@ -38,12 +38,12 @@ function TrialBanner({ daysRemaining }: { daysRemaining: number | null }) {
 }
 
 function AppContent() {
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading, error: profileError, refetch: refetchProfile } = useProfile();
   const { subscription } = useSubscription();
   const [showAddExpense, setShowAddExpense] = useState(false);
   const location = useLocation();
 
-  // Verificar se completou onboarding
+  // Verificar se completou onboarding - só considera false se profile foi carregado com sucesso
   const hasCompletedOnboarding = profile?.has_completed_onboarding ?? false;
 
   // Páginas sem bottom nav
@@ -67,8 +67,28 @@ function AppContent() {
     );
   }
 
+  // Se houve erro ao carregar profile, mostrar tela de erro com retry
+  if (profileError || (!profile && !profileLoading)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 p-6 text-center">
+          <div className="text-4xl">⚠️</div>
+          <h2 className="text-xl font-semibold text-text">Erro ao carregar perfil</h2>
+          <p className="text-text-muted">Não foi possível carregar seus dados. Tente novamente.</p>
+          <button
+            onClick={() => refetchProfile()}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Redirecionar para onboarding se não completou (exceto se estiver no checkout)
-  if (!hasCompletedOnboarding && location.pathname !== '/onboarding' && location.pathname !== '/checkout') {
+  // Só redireciona se profile foi carregado com sucesso
+  if (profile && !hasCompletedOnboarding && location.pathname !== '/onboarding' && location.pathname !== '/checkout') {
     return <Navigate to="/onboarding" replace />;
   }
 
