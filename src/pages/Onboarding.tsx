@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button, ProgressBar } from '../components/ui';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { useProfile } from '../hooks/useProfile';
@@ -11,7 +10,6 @@ import { LeisureStep } from '../components/onboarding/LeisureStep';
 import { CompleteStep } from '../components/onboarding/CompleteStep';
 
 export function Onboarding() {
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { completeOnboarding: saveToDatabase } = useProfile();
   const {
@@ -57,7 +55,9 @@ export function Onboarding() {
         return;
       }
 
-      navigate('/dashboard');
+      // Use window.location to force full page reload
+      // This ensures all hooks fetch fresh data from the database
+      window.location.href = '/dashboard';
     } catch (err) {
       console.error('Error completing onboarding:', err);
       setIsSubmitting(false);
