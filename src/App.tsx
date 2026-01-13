@@ -38,15 +38,34 @@ function TrialBanner({ daysRemaining }: { daysRemaining: number | null }) {
 }
 
 function AppContent() {
-  const { profile, loading: profileLoading, error: profileError, refetch: refetchProfile } = useProfile();
+  const {
+    profile,
+    loading: profileLoading,
+    error: profileError,
+    fetchStatus,
+    refetch: refetchProfile
+  } = useProfile();
   const { subscription } = useSubscription();
   const [showAddExpense, setShowAddExpense] = useState(false);
   const location = useLocation();
 
-  // Verificar se completou onboarding - só considera false se profile foi carregado com sucesso
-  const hasCompletedOnboarding = profile?.has_completed_onboarding ?? false;
+  // DEBUG: Log state changes
+  useEffect(() => {
+    console.log('[Finny] AppContent state:', {
+      profileLoading,
+      profileError,
+      fetchStatus,
+      hasProfile: !!profile,
+      hasCompletedOnboarding: profile?.has_completed_onboarding,
+      pathname: location.pathname
+    });
+  }, [profileLoading, profileError, fetchStatus, profile, location.pathname]);
 
-  // Páginas sem bottom nav
+  // CRITICAL: Only consider onboarding complete if profile was SUCCESSFULLY loaded
+  const profileLoadedSuccessfully = fetchStatus === 'success' && profile !== null;
+  const hasCompletedOnboarding = profileLoadedSuccessfully && profile.has_completed_onboarding === true;
+
+  // Paginas sem bottom nav
   const pagesWithoutNav = ['/onboarding', '/checkout'];
   const showBottomNav = hasCompletedOnboarding && !pagesWithoutNav.includes(location.pathname);
 
@@ -55,8 +74,9 @@ function AppContent() {
                           subscription.daysRemaining !== null &&
                           subscription.daysRemaining <= 3;
 
-  // Loading do profile
-  if (profileLoading) {
+  // Loading do profile (includes retry attempts)
+  if (profileLoading || fetchStatus === 'loading') {
+    console.log('[Finny] AppContent: Showing loading screen');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -67,14 +87,49 @@ function AppContent() {
     );
   }
 
-  // Se houve erro ao carregar profile, mostrar tela de erro com retry
-  if (profileError || (!profile && !profileLoading)) {
+  // CRITICAL: If fetch failed, show error screen - NEVER redirect to onboarding
+  if (fetchStatus === 'error' || profileError) {
+    console.log('[Finny] AppContent: Showing error screen', { fetchStatus, profileError });
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 p-6 text-center">
           <div className="text-4xl">⚠️</div>
           <h2 className="text-xl font-semibold text-text">Erro ao carregar perfil</h2>
-          <p className="text-text-muted">Não foi possível carregar seus dados. Tente novamente.</p>
+          <p className="text-text-muted">
+            {profileError || 'Não foi possível carregar seus dados. Tente novamente.'}
+          </p>
+          <button
+            onClick={() => {
+              console.log('[Finny] AppContent: Retry button clicked');
+              refetchProfile();
+            }}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Tentar novamente
+          </button>
+          <button
+            onClick={() => {
+              console.log('[Finny] AppContent: Logout button clicked');
+              supabase.auth.signOut();
+            }}
+            className="px-6 py-2 text-text-muted hover:text-text transition-colors"
+          >
+            Sair da conta
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // CRITICAL: If profile is null but no error and not loading, show error
+  if (!profile && fetchStatus !== 'idle') {
+    console.warn('[Finny] AppContent: Profile is null but no error - unexpected state');
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 p-6 text-center">
+          <div className="text-4xl">⚠️</div>
+          <h2 className="text-xl font-semibold text-text">Estado inesperado</h2>
+          <p className="text-text-muted">Algo deu errado. Por favor, tente novamente.</p>
           <button
             onClick={() => refetchProfile()}
             className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
@@ -86,9 +141,10 @@ function AppContent() {
     );
   }
 
-  // Redirecionar para onboarding se não completou (exceto se estiver no checkout)
-  // Só redireciona se profile foi carregado com sucesso
+  // At this point: fetchStatus === 'success' AND profile !== null
+  // Now we can safely check onboarding status
   if (profile && !hasCompletedOnboarding && location.pathname !== '/onboarding' && location.pathname !== '/checkout') {
+    console.log('[Finny] AppContent: Redirecting to /onboarding (has_completed_onboarding is false)');
     return <Navigate to="/onboarding" replace />;
   }
 
