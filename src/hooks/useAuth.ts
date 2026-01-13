@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
@@ -21,25 +21,60 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Track if we had a valid user to prevent oscillation during token refresh
+  const hadValidUserRef = useRef(false)
+  const lastUserIdRef = useRef<string | null>(null)
+
   useEffect(() => {
     // Get initial session with error handling
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
         if (error) {
-          console.error('Auth error:', error)
+          console.error('[Finny] Auth error:', error)
         }
-        setUser(session?.user ?? null)
+        const newUser = session?.user ?? null
+        console.log('[Finny] useAuth: Initial session', { userId: newUser?.id })
+
+        if (newUser) {
+          hadValidUserRef.current = true
+          lastUserIdRef.current = newUser.id
+        }
+        setUser(newUser)
         setLoading(false)
       })
       .catch((err) => {
-        console.error('Auth failed:', err)
+        console.error('[Finny] Auth failed:', err)
         setLoading(false)
       })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null)
+      (event, session) => {
+        const newUser = session?.user ?? null
+        console.log('[Finny] useAuth: Auth state changed', {
+          event,
+          userId: newUser?.id,
+          hadValidUser: hadValidUserRef.current,
+          lastUserId: lastUserIdRef.current
+        })
+
+        // If we get null but previously had a valid user, ignore it
+        // This handles Supabase token refresh oscillation
+        if (!newUser && hadValidUserRef.current && event !== 'SIGNED_OUT') {
+          console.log('[Finny] useAuth: Ignoring null user during token refresh')
+          return
+        }
+
+        if (newUser) {
+          hadValidUserRef.current = true
+          lastUserIdRef.current = newUser.id
+        } else if (event === 'SIGNED_OUT') {
+          // Only reset on explicit sign out
+          hadValidUserRef.current = false
+          lastUserIdRef.current = null
+        }
+
+        setUser(newUser)
       }
     )
 
