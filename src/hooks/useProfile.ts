@@ -22,6 +22,9 @@ export function useProfile() {
   // Track retry attempts
   const retryCountRef = useRef(0)
   const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Track if we already have a valid profile to avoid resetting on auth oscillation
+  const hasValidProfileRef = useRef(false)
+  const lastUserIdRef = useRef<string | null>(null)
 
   const fetchProfile = useCallback(async (isRetry = false) => {
     // CRITICAL: Only fetch if user.id is available
@@ -70,6 +73,7 @@ export function useProfile() {
       setFetchStatus('success')
       setLoading(false)
       retryCountRef.current = 0 // Reset on success
+      hasValidProfileRef.current = true // Mark that we have a valid profile
     } catch (err) {
       if (!isMountedRef.current) return
 
@@ -119,7 +123,11 @@ export function useProfile() {
 
   // Fetch profile when user.id changes
   useEffect(() => {
-    console.log('[Finny] useProfile: user.id changed', { userId: user?.id })
+    console.log('[Finny] useProfile: user.id changed', {
+      userId: user?.id,
+      hasValidProfile: hasValidProfileRef.current,
+      lastUserId: lastUserIdRef.current
+    })
 
     // Clear any pending retry
     if (retryTimeoutRef.current) {
@@ -127,8 +135,14 @@ export function useProfile() {
       retryTimeoutRef.current = null
     }
 
-    // Reset state when user changes
+    // If user.id is undefined but we already have a valid profile, DON'T reset
+    // This handles Supabase auth oscillation during token refresh
     if (!user?.id) {
+      if (hasValidProfileRef.current && lastUserIdRef.current) {
+        console.log('[Finny] useProfile: Ignoring undefined user.id - keeping valid profile')
+        return // Keep the existing profile
+      }
+      // Only reset if we never had a valid profile
       setProfile(null)
       setLoading(false)
       setError(null)
@@ -136,8 +150,15 @@ export function useProfile() {
       return
     }
 
+    // If same user, don't refetch if we already have a valid profile
+    if (user.id === lastUserIdRef.current && hasValidProfileRef.current && profile) {
+      console.log('[Finny] useProfile: Same user, keeping existing profile')
+      return
+    }
+
+    lastUserIdRef.current = user.id
     fetchProfile()
-  }, [user?.id, fetchProfile])
+  }, [user?.id, fetchProfile, profile])
 
   const updateProfile = async (updates: ProfileUpdate) => {
     if (!user?.id) {
