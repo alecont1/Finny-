@@ -75,8 +75,12 @@ function AppContent() {
                           subscription.daysRemaining <= 3;
 
   // Loading do profile (includes retry attempts)
-  if (profileLoading || fetchStatus === 'loading') {
-    console.log('[Finny] AppContent: Showing loading screen');
+  // Also show loading when fetchStatus is 'idle' and we don't have a profile yet
+  // This prevents the "/" route from redirecting to /onboarding before fetch completes
+  const isProfileLoading = profileLoading || fetchStatus === 'loading' || (fetchStatus === 'idle' && !profile);
+
+  if (isProfileLoading) {
+    console.log('[Finny] AppContent: Showing loading screen', { profileLoading, fetchStatus, hasProfile: !!profile });
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
